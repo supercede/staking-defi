@@ -21,7 +21,10 @@ def test_return_rewards_amount_of_token():
     tx = reward_token.approve(staking.address, STAKING_AMOUNT, {"from": account})
     tx.wait(1)
 
-    staking.stake(STAKING_AMOUNT)
+    staking_tx = staking.stake(STAKING_AMOUNT, {"from": account})
+    staking_tx.wait(1)
+
+    assert staking_tx.events["Staked"] is not None
 
     chain.sleep(SECONDS_IN_A_DAY)
     chain.mine(1)
@@ -44,7 +47,10 @@ def test_move_token_from_user_to_contract():
     tx = reward_token.approve(staking.address, STAKING_AMOUNT, {"from": account})
     tx.wait(1)
 
-    staking.stake(STAKING_AMOUNT)
+    staking_tx = staking.stake(STAKING_AMOUNT, {"from": account})
+    staking_tx.wait(1)
+
+    assert staking_tx.events["Staked"] is not None
 
     chain.sleep(SECONDS_IN_A_DAY)
     chain.mine(1)
@@ -61,13 +67,19 @@ def test_add_user_withdrawal_to_wallet():
     tx = reward_token.approve(staking.address, STAKING_AMOUNT, {"from": account})
     tx.wait(1)
 
-    staking.stake(STAKING_AMOUNT)
+    staking_tx = staking.stake(STAKING_AMOUNT, {"from": account})
+    staking_tx.wait(1)
+
+    assert staking_tx.events["Staked"] is not None
 
     chain.sleep(SECONDS_IN_A_DAY)
     chain.mine(1)
 
     balance_before = reward_token.balanceOf(account.address)
-    staking.withdraw(STAKING_AMOUNT)
+
+    withdraw_tx = staking.withdraw(STAKING_AMOUNT, {"from": account})
+    withdraw_tx.wait(1)
+    assert withdraw_tx.events["WithdrewStake"] is not None
 
     balance_after = reward_token.balanceOf(account.address)
     earned = staking.earned(account)
@@ -83,14 +95,21 @@ def test_user_can_claim_reward():
     tx = reward_token.approve(staking.address, STAKING_AMOUNT, {"from": account})
     tx.wait(1)
 
-    staking.stake(STAKING_AMOUNT)
+    staking_tx = staking.stake(STAKING_AMOUNT, {"from": account})
+    staking_tx.wait(1)
+
+    assert staking_tx.events["Staked"] is not None
 
     chain.sleep(SECONDS_IN_A_DAY)
     chain.mine(1)
 
     earned = staking.earned(account.address)
     balance_before = reward_token.balanceOf(account.address)
-    staking.claimReward()
+    reward_tx = staking.claimReward({"from": account})
+    reward_tx.wait(1)
+
+    assert reward_tx.events["RewardsClaimed"] is not None
+
     balance_after = reward_token.balanceOf(account.address)
 
     assert balance_before + earned == balance_after
