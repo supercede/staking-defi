@@ -1,0 +1,1 @@
+### Minimal defi staking smart contract created with hardhat (JavaScript).
