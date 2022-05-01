@@ -75,14 +75,17 @@ describe("Staking test", async function () {
 
     it("Users can claim their rewards", async () => {
         await rewardToken.approve(staking.address, stakeAmount)
-        await staking.stake(stakeAmount)
+        // await staking.stake(stakeAmount)
+
+        expect(await staking.stake(stakeAmount)).emit(staking, "Staked")
 
         await moveTime(SECONDS_IN_A_DAY)
         await moveBlocks(1)
 
         const earned = await staking.earned(alice.address)
         const balanceBefore = await rewardToken.balanceOf(alice.address)
-        await staking.claimReward()
+        // await staking.claimReward()
+        expect(await staking.claimReward()).emit(staking, "RewardsClaimed")
         const balanceAfter = await rewardToken.balanceOf(alice.address)
         assert.equal(balanceBefore.add(earned).toString(), balanceAfter.toString())
     })
